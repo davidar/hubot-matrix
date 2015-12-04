@@ -1,0 +1,21 @@
+{
+  "name": "hubot-matrix",
+  "version": "1.0.0",
+  "description": "Matrix adapter for hubot",
+  "main": "src/matrix.coffee",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "David A Roberts",
+  "license": "MIT",
+  "dependencies": {
+    "parent-require": "^1.0.0",
+    "matrix-js-sdk": ">=0.3.0"
+  },
+  "peerDependencies": {
+    "hubot": ">=2.0"
+  },
+  "devDependencies": {
+    "coffee-script": ">=1.2.0"
+  }
+}
