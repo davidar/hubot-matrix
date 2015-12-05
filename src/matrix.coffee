@@ -5,6 +5,7 @@ catch
   {Robot,Adapter,TextMessage,User} = prequire 'hubot'
 
 sdk = require 'matrix-js-sdk'
+request = require 'request'
 
 class Matrix extends Adapter
   constructor: ->
@@ -14,11 +15,22 @@ class Matrix extends Adapter
   send: (envelope, strings...) ->
     for str in strings
       @robot.logger.info "Sending to #{envelope.room}: #{str}"
-      @client.sendTextMessage envelope.room, str
+      if /^(f|ht)tps?:\/\//i.test(str)
+        @sendImage envelope, str
+      else
+        @client.sendTextMessage envelope.room, str
 
   reply: (envelope, strings...) ->
     for str in strings
       @send envelope, "#{envelope.user.name}: #{str}"
+
+  sendImage: (envelope, url) ->
+    @client.uploadContent(stream: request url, name: url).done (murl) =>
+        @client.sendMessage envelope.room, {
+            msgtype: "m.image",
+            body: url,
+            url: JSON.parse(murl).content_uri
+        }
 
   run: ->
     @robot.logger.info "Run #{@robot.name}"

@@ -1,6 +1,6 @@
 {
   "name": "hubot-matrix",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Matrix adapter for hubot",
   "main": "src/matrix.coffee",
   "scripts": {
