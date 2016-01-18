@@ -34,7 +34,7 @@ class Matrix extends Adapter
 
   run: ->
     @robot.logger.info "Run #{@robot.name}"
-    client = sdk.createClient('https://matrix.org')
+    client = sdk.createClient(process.env.HUBOT_MATRIX_HOST_SERVER || 'https://matrix.org')
     client.login 'm.login.password', {
       user: @robot.name
       password: process.env.HUBOT_MATRIX_PASSWORD
@@ -46,7 +46,7 @@ class Matrix extends Adapter
         @access_token = data.access_token
         @robot.logger.info "Logged in #{@user_id}"
         @client = sdk.createClient
-            baseUrl: 'https://matrix.org'
+            baseUrl: process.env.HUBOT_MATRIX_HOST_SERVER || 'https://matrix.org'
             accessToken: @access_token
             userId: @user_id
         @client.on 'syncComplete', =>
