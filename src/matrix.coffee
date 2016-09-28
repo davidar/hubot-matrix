@@ -71,7 +71,7 @@ class Matrix extends Adapter
                 @robot.logger.info "Synced #{@client.getRooms().length} rooms"
                 @emit 'connected'
         @client.on 'Room.timeline', (event, room, toStartOfTimeline) =>
-            if event.getType() == 'm.room.message' and toStartOfTimeline == false
+            if event.getType() == 'm.room.message' and event.getContent().msgtype != "m.notice" and toStartOfTimeline == false
                 message = event.getContent().body
                 name = event.getSender()
                 user = @robot.brain.userForId name
