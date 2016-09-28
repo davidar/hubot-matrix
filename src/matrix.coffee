@@ -23,9 +23,22 @@ class Matrix extends Adapter
           body: str
         }
 
+  emote: (envelope, strings...) ->
+    for str in strings
+      @client.sendMessage envelope.room, {
+        msgtype: "m.emote",
+        body: str
+      }
+
   reply: (envelope, strings...) ->
     for str in strings
       @send envelope, "#{envelope.user.name}: #{str}"
+
+  topic: (envelope, strings...) ->
+    for str in strings
+      @sendEvent envelope.room, "m.room.topic", {
+        topic: str
+      }
 
   sendImage: (envelope, url) ->
     @client.uploadContent(stream: request url, name: url).done (murl) =>
