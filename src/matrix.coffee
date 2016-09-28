@@ -18,7 +18,10 @@ class Matrix extends Adapter
       if /^(f|ht)tps?:\/\//i.test(str)
         @sendImage envelope, str
       else
-        @client.sendTextMessage envelope.room, str
+        @client.sendMessage envelope.room, {
+          msgtype: "m.notice",
+          body: str
+        }
 
   reply: (envelope, strings...) ->
     for str in strings
