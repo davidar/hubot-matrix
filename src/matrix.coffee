@@ -36,7 +36,7 @@ class Matrix extends Adapter
 
   topic: (envelope, strings...) ->
     for str in strings
-      @sendEvent envelope.room, "m.room.topic", {
+      @client.sendEvent envelope.room, "m.room.topic", {
         topic: str
       }
 
