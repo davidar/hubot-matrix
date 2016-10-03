@@ -18,11 +18,27 @@ class Matrix extends Adapter
       if /^(f|ht)tps?:\/\//i.test(str)
         @sendImage envelope, str
       else
-        @client.sendTextMessage envelope.room, str
+        @client.sendMessage envelope.room, {
+          msgtype: "m.notice",
+          body: str
+        }
+
+  emote: (envelope, strings...) ->
+    for str in strings
+      @client.sendMessage envelope.room, {
+        msgtype: "m.emote",
+        body: str
+      }
 
   reply: (envelope, strings...) ->
     for str in strings
       @send envelope, "#{envelope.user.name}: #{str}"
+
+  topic: (envelope, strings...) ->
+    for str in strings
+      @client.sendEvent envelope.room, "m.room.topic", {
+        topic: str
+      }
 
   sendImage: (envelope, url) ->
     @client.uploadContent(stream: request url, name: url).done (murl) =>
@@ -49,11 +65,14 @@ class Matrix extends Adapter
             baseUrl: process.env.HUBOT_MATRIX_HOST_SERVER || 'https://matrix.org'
             accessToken: @access_token
             userId: @user_id
-        @client.on 'syncComplete', =>
-            @robot.logger.info "Synced #{@client.getRooms().length} rooms"
-            @emit 'connected'
+        @client.on 'sync', (state, prevState, data) =>
+            switch state
+              when "PREPARED"
+                @robot.logger.info "Synced #{@client.getRooms().length} rooms"
+                @emit 'connected'
         @client.on 'Room.timeline', (event, room, toStartOfTimeline) =>
-            if event.getType() == 'm.room.message' and toStartOfTimeline == false
+            @client.sendReadReceipt(event)
+            if event.getType() == 'm.room.message' and event.getContent().msgtype != "m.notice" and toStartOfTimeline == false
                 message = event.getContent().body
                 name = event.getSender()
                 user = @robot.brain.userForId name
