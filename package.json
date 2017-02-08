@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "parent-require": "^1.0.0",
-    "matrix-js-sdk": "^0.6.0"
+    "matrix-js-sdk": "*"
   },
   "peerDependencies": {
     "hubot": ">=2.0"
