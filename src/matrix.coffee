@@ -36,9 +36,9 @@ class Matrix extends Adapter
 
   topic: (envelope, strings...) ->
     for str in strings
-      @client.sendEvent envelope.room, "m.room.topic", {
+      @client.sendStateEvent envelope.room, "m.room.topic", {
         topic: str
-      }
+      }, ""
 
   sendImage: (envelope, url) ->
     @client.uploadContent(stream: request url, name: url).done (murl) =>
