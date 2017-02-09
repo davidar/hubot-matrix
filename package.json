@@ -9,8 +9,9 @@
   "author": "David A Roberts",
   "license": "MIT",
   "dependencies": {
-    "parent-require": "^1.0.0",
-    "matrix-js-sdk": "*"
+    "matrix-js-sdk": "*",
+    "node-localstorage": "^1.3.0",
+    "parent-require": "^1.0.0"
   },
   "peerDependencies": {
     "hubot": ">=2.0"
