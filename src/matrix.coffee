@@ -81,15 +81,15 @@ class Matrix extends Adapter
                 @robot.logger.info "Synced #{@client.getRooms().length} rooms"
                 @emit 'connected'
         @client.on 'Room.timeline', (event, room, toStartOfTimeline) =>
-            @client.sendReadReceipt(event)
-            if event.getType() == 'm.room.message' and event.getContent().msgtype != "m.notice" and toStartOfTimeline == false
-                message = event.getContent().body
+            if event.getType() == 'm.room.message' and toStartOfTimeline == false
+                message = event.getContent()
                 name = event.getSender()
                 user = @robot.brain.userForId name
                 user.room = room.roomId
                 if user.name != @user_id
-                    @robot.logger.info "Received message: '#{message}' in room: #{user.room}, from: #{user.name}."
-                    @receive new TextMessage user, message
+                    @robot.logger.info "Received message: #{JSON.stringify message} in room: #{user.room}, from: #{user.name}."
+                    @receive new TextMessage user, message.body if message.msgtype == "m.text"
+                    @client.sendReadReceipt(event) if message.msgtype != "m.text" or message.body.indexOf(@robot.name) != -1
         @client.on 'RoomMember.membership', (event, member) =>
             if member.membership == 'invite' and member.userId == @user_id
                 @client.joinRoom(member.roomId).done =>
