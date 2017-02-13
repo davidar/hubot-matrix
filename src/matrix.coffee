@@ -82,6 +82,7 @@ class Matrix extends Adapter
                 @emit 'connected'
         @client.on 'Room.timeline', (event, room, toStartOfTimeline) =>
             if event.getType() == 'm.room.message' and toStartOfTimeline == false
+                @client.setPresence "online"
                 message = event.getContent()
                 name = event.getSender()
                 user = @robot.brain.userForId name
