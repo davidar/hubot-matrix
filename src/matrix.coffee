@@ -17,6 +17,12 @@ class Matrix extends Adapter
     super
     @robot.logger.info "Constructor"
 
+  handleUnknownDevices: (err) ->
+    for stranger, devices of err.devices
+      for device, _ of devices
+        @robot.logger.info "Acknowledging #{stranger}'s device #{device}"
+        @client.setDeviceKnown(stranger, device)
+
   send: (envelope, strings...) ->
     for str in strings
       @robot.logger.info "Sending to #{envelope.room}: #{str}"
@@ -25,18 +31,15 @@ class Matrix extends Adapter
       else
         @client.sendNotice(envelope.room, str).catch (err) =>
           if err.name == 'UnknownDeviceError'
-            for stranger, devices of err.devices
-              for device, _ of devices
-                @robot.logger.info "Acknowledging #{stranger}'s device #{device}"
-                @client.setDeviceKnown(stranger, device)
+            @handleUnknownDevices err
             @client.sendNotice(envelope.room, str)
 
   emote: (envelope, strings...) ->
     for str in strings
-      @client.sendMessage envelope.room, {
-        msgtype: "m.emote",
-        body: str
-      }
+      @client.sendEmoteMessage(envelope.room, str).catch (err) =>
+        if err.name == 'UnknownDeviceError'
+          @handleUnknownDevices err
+          @client.sendEmoteMessage(envelope.room, str)
 
   reply: (envelope, strings...) ->
     for str in strings
@@ -60,7 +63,10 @@ class Matrix extends Adapter
           dims.type = 'jpeg' if dims.type == 'jpg'
           info = { mimetype: "image/#{dims.type}", h: dims.height, w: dims.width, size: body.length }
           @client.uploadContent(body, name: url, type: info.mimetype, rawResponse: false, onlyContentUri: true).done (content_uri) =>
-            @client.sendImageMessage(envelope.room, content_uri, info, url)
+            @client.sendImageMessage(envelope.room, content_uri, info, url).catch (err) =>
+              if err.name == 'UnknownDeviceError'
+                @handleUnknownDevices err
+                @client.sendImageMessage(envelope.room, content_uri, info, url)
         catch error
           @robot.logger.info error.message
           @send envelope, " #{url}"
