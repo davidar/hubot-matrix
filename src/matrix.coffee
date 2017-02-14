@@ -6,6 +6,7 @@ catch
 
 sdk = require 'matrix-js-sdk'
 request = require 'request'
+sizeOf = require 'image-size'
 
 unless localStorage?
   {LocalStorage} = require('node-localstorage')
@@ -20,7 +21,7 @@ class Matrix extends Adapter
     for str in strings
       @robot.logger.info "Sending to #{envelope.room}: #{str}"
       if /^(f|ht)tps?:\/\//i.test(str)
-        @sendImage envelope, str
+        @sendURL envelope, str
       else
         @client.sendNotice(envelope.room, str).catch (err) =>
           if err.name == 'UnknownDeviceError'
@@ -47,13 +48,22 @@ class Matrix extends Adapter
         topic: str
       }, ""
 
-  sendImage: (envelope, url) ->
-    @client.uploadContent(stream: request url, name: url).done (murl) =>
-        @client.sendMessage envelope.room, {
-            msgtype: "m.image",
-            body: url,
-            url: JSON.parse(murl).content_uri
-        }
+  sendURL: (envelope, url) ->
+    @robot.logger.info "Downloading #{url}"
+    request url: url, encoding: null, (error, response, body) =>
+      if error
+        @robot.logger.info "Request error: #{JSON.stringify error}"
+      else if response.statusCode == 200
+        try
+          dims = sizeOf body
+          @robot.logger.info "Image has dimensions #{JSON.stringify dims}, size #{body.length}"
+          dims.type = 'jpeg' if dims.type == 'jpg'
+          info = { mimetype: "image/#{dims.type}", h: dims.height, w: dims.width, size: body.length }
+          @client.uploadContent(body, name: url, type: info.mimetype, rawResponse: false, onlyContentUri: true).done (content_uri) =>
+            @client.sendImageMessage(envelope.room, content_uri, info, url)
+        catch error
+          @robot.logger.info error.message
+          @send envelope, " #{url}"
 
   run: ->
     @robot.logger.info "Run #{@robot.name}"
