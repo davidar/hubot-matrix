@@ -114,6 +114,7 @@ class Matrix extends Adapter {
   run() {
     this.robot.logger.info(`Run ${this.robot.name}`);
     let client = sdk.createClient(process.env.HUBOT_MATRIX_HOST_SERVER || 'https://matrix.org');
+    this.robot.matrixClient = client;
     return client.login('m.login.password', {
       user: this.robot.name,
       password: process.env.HUBOT_MATRIX_PASSWORD
@@ -121,7 +122,7 @@ class Matrix extends Adapter {
         if (err) {
             this.robot.logger.error(err);
             return;
-          }
+        }
         this.user_id = data.user_id;
         this.access_token = data.access_token;
         this.device_id = data.device_id;
@@ -145,7 +146,8 @@ class Matrix extends Adapter {
                 this.client.setPresence("online");
                 let message = event.getContent();
                 let name = event.getSender();
-                let user = this.robot.brain.userForId(name);
+                let prettyname = room.currentState._userIdsToDisplayNames[name];
+                let user = this.robot.brain.userForId(name, { name: prettyname });
                 user.room = room.roomId;
                 if (user.name !== this.user_id) {
                     this.robot.logger.info(`Received message: ${JSON.stringify(message)} in room: ${user.room}, from: ${user.name}.`);
@@ -167,5 +169,5 @@ class Matrix extends Adapter {
 }
 
 module.exports.use = (robot) => {
-  return new Matrix(robot);
+    return new Matrix(robot);
 };
