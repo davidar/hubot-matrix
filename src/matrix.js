@@ -116,7 +116,7 @@ class Matrix extends Adapter {
     let client = sdk.createClient(process.env.HUBOT_MATRIX_HOST_SERVER || 'https://matrix.org');
     this.robot.matrixClient = client;
     return client.login('m.login.password', {
-      user: this.robot.name,
+      user: process.env.HUBOT_MATRIX_USER || this.robot.name,
       password: process.env.HUBOT_MATRIX_PASSWORD
     }, (err, data) => {
         if (err) {
@@ -138,6 +138,13 @@ class Matrix extends Adapter {
             switch (state) {
               case "PREPARED":
                 this.robot.logger.info(`Synced ${this.client.getRooms().length} rooms`);
+                // We really don't want to let people set the display name to something other than the bot
+                // name because the bot only reacts to it's own name.
+                const currentDisplayName = this.client.getUser(this.user_id).displayName;
+                if (this.robot.name !== currentDisplayName) {
+                  this.robot.logger.info(`Setting display name to ${this.robot.name}`);
+                  this.client.setDisplayName(this.robot.name, ()=>{});
+                }
                 return this.emit('connected');
             }
         });
