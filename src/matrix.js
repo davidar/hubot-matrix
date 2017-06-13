@@ -156,7 +156,7 @@ class Matrix extends Adapter {
                 let prettyname = room.currentState._userIdsToDisplayNames[name];
                 let user = this.robot.brain.userForId(name, { name: prettyname });
                 user.room = room.roomId;
-                if (user.name !== this.user_id) {
+                if (user.id !== this.user_id) {
                     this.robot.logger.info(`Received message: ${JSON.stringify(message)} in room: ${user.room}, from: ${user.name}.`);
                     if (message.msgtype === "m.text") { this.receive(new TextMessage(user, message.body)); }
                     if ((message.msgtype !== "m.text") || (message.body.indexOf(this.robot.name) !== -1)) { return this.client.sendReadReceipt(event); }
