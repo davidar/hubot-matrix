@@ -1,6 +1,6 @@
 {
   "name": "hubot-matrix",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Matrix adapter for hubot",
   "main": "src/matrix.js",
   "scripts": {
