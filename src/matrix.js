@@ -1,9 +1,13 @@
 let Adapter, localStorage, Robot, TextMessage, User;
 try {
-  ({Robot,Adapter,TextMessage,User} = require('hubot'));
-} catch (error) {
-  let prequire = require('parent-require');
-  ({Robot,Adapter,TextMessage,User} = prequire('hubot'));
+  ({Robot,Adapter,TextMessage,User} = require('hubot/es2015'));
+} catch (e) {
+  try {
+    ({Robot,Adapter,TextMessage,User} = require('hubot'));
+  } catch (error) {
+    let prequire = require('parent-require');
+    ({Robot,Adapter,TextMessage,User} = prequire('hubot'));
+  }
 }
 
 let sdk = require('matrix-js-sdk');
