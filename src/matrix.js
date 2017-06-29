@@ -45,17 +45,18 @@ class Matrix extends Adapter {
   }
 
   send(envelope, ...strings) {
+    var that = this;
     return (() => {
       let result = [];
       for (var str of Array.from(strings)) {
         this.robot.logger.info(`Sending to ${envelope.room}: ${str}`);
         if (/^(f|ht)tps?:\/\//i.test(str)) {
-          result.push(this.sendURL(envelope, str));
+          result.push(that.sendURL(envelope, str));
         } else {
-          result.push(this.client.sendNotice(envelope.room, str).catch(err => {
+          result.push(that.client.sendNotice(envelope.room, str).catch(err => {
             if (err.name === 'UnknownDeviceError') {
-              this.handleUnknownDevices(err);
-              return this.client.sendNotice(envelope.room, str);
+              that.handleUnknownDevices(err);
+              return that.client.sendNotice(envelope.room, str);
             }
           }));
         }
