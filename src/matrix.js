@@ -106,7 +106,8 @@ class Matrix extends Adapter {
     })();
   }
 
-  send(envelope, ...strings) {
+  send(envelope) {
+    this.robot.logger.info("Sending...");
     return (() => {
       let result = [];
       for (var str of Array.from(strings)) {
