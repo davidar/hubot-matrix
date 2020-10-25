@@ -10,6 +10,7 @@ Use the version of this adapter appropriate to your Hubot version.
 * For Hubot v3, `npm i hubot-matrix@2`
 
 | **hubot** | **hubot-matrix** |
+|----|----|
 | v2 | v1 |
 | v3 | v2 |
 
