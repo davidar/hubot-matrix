@@ -14,6 +14,9 @@ let sdk = require('matrix-js-sdk');
 let request = require('request');
 let sizeOf = require('image-size');
 
+// Fetch the room whitelist if it exists
+let roomWhitelist = process.env.HUBOT_MATRIX_ROOM_WHITELIST ? process.env.HUBOT_MATRIX_ROOM_WHITELIST.split(",") : null;
+
 if (localStorage == null) {
   let {LocalStorage} = require('node-localstorage');
   localStorage = new LocalStorage('./hubot-matrix.localStorage');
@@ -167,17 +170,26 @@ class Matrix extends Adapter {
                 user.room = room.roomId;
                 if (user.id !== that.user_id) {
                     that.robot.logger.info(`Received message: ${JSON.stringify(message)} in room: ${user.room}, from: ${user.name}.`);
-                    if (message.msgtype === "m.text") { that.receive(new TextMessage(user, message.body)); }
-                    if ((message.msgtype !== "m.text") || (message.body.indexOf(that.robot.name) !== -1)) { return that.client.sendReadReceipt(event); }
+
+                    // Check this room against the whitelist if it exists
+                    if (!roomWhitelist || roomWhitelist.includes(user.room)) {
+                      if (message.msgtype === "m.text") { that.receive(new TextMessage(user, message.body)); }
+                      if ((message.msgtype !== "m.text") || (message.body.indexOf(that.robot.name) !== -1)) { return that.client.sendReadReceipt(event); }
+                    }
                   }
               }
         });
         that.client.on('RoomMember.membership', (event, member) => {
             if ((member.membership === 'invite') && (member.userId === that.user_id)) {
+              // Don't join non whitelisted rooms
+              if (!roomWhitelist || roomWhitelist.includes(member.roomId)) {
                 return that.client.joinRoom(member.roomId).done(() => {
                     return that.robot.logger.info(`Auto-joined ${member.roomId}`);
                 });
               }
+            } else {
+              that.robot.logger.info(`Ignoring invite to non whitelisted room: ${member.roomId}`);
+            }
         });
         return that.client.startClient(0);
     });

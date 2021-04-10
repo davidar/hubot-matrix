@@ -21,3 +21,4 @@ Set the following variables:
 * `HUBOT_MATRIX_HOST_SERVER` - the Matrix server to connect to (default is `https://matrix.org` if unset)
 * `HUBOT_MATRIX_USER` - bot login on the Matrix server - eg `@examplebotname:matrix.example.org`
 * `HUBOT_MATRIX_PASSWORD` - bot password on the Matrix server
+* `HUBOT_MATRIX_ROOM_WHITELIST` - Optionally include a comma separated list of room IDs to restrict commands to - e.g. `!cASGtOHlSftdScFNMs:matrix.org,!cASGtOHlSftdScFNMs:matrix.org`
