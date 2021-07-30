@@ -54,15 +54,26 @@ class Matrix extends Adapter {
       let result = [];
       for (var str of Array.from(strings)) {
         that.robot.logger.info(`Sending to ${envelope.room}: ${str}`);
+        let format = process.env.HUBOT_MATRIX_MESSAGE_FORMAT || 'html';
         if (/^(f|ht)tps?:\/\//i.test(str)) {
           result.push(that.sendURL(envelope, str));
         } else {
-          result.push(that.client.sendNotice(envelope.room, str).catch(err => {
-            if (err.name === 'UnknownDeviceError') {
-              that.handleUnknownDevices(err);
-              return that.client.sendNotice(envelope.room, str);
-            }
-          }));
+          if (format == 'text') {
+            result.push(that.client.sendNotice(envelope.room, str).catch(err => {
+              if (err.name === 'UnknownDeviceError') {
+                that.handleUnknownDevices(err);
+                return that.client.sendNotice(envelope.room, str);
+              }
+            }));
+          }
+          else {
+            result.push(that.client.sendHtmlNotice(envelope.room, str, `${str.replace('\n', '<br>')}`).catch(err => {
+              if (err.name === 'UnknownDeviceError') {
+                that.handleUnknownDevices(err);
+                return that.client.sendNotice(envelope.room, str);
+              }
+            }));
+          }
         }
       }
       return result;
