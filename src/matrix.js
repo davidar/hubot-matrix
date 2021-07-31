@@ -162,11 +162,10 @@ class Matrix extends Adapter {
                 that.client.setPresence("online");
                 let message = event.getContent();
                 let name = event.getSender();
-                let prettyname = room.currentState._userIdsToDisplayNames[name];
-                let user = that.robot.brain.userForId(name, { name: prettyname });
+                let user = that.robot.brain.userForId(name);
                 user.room = room.roomId;
-                if (user.id !== that.user_id) {
-                    that.robot.logger.info(`Received message: ${JSON.stringify(message)} in room: ${user.room}, from: ${user.name}.`);
+                if (name !== that.user_id) {
+                    that.robot.logger.info(`Received message: ${JSON.stringify(message)} in room: ${user.room}, from: ${user.name} (${user.id}).`);
                     if (message.msgtype === "m.text") { that.receive(new TextMessage(user, message.body)); }
                     if ((message.msgtype !== "m.text") || (message.body.indexOf(that.robot.name) !== -1)) { return that.client.sendReadReceipt(event); }
                   }
