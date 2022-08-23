@@ -2,10 +2,7 @@
   "name": "hubot-matrix",
   "version": "2.0.1",
   "description": "Matrix adapter for Hubot",
-  "main": "src/matrix.js",
-  "scripts": {
-    "test": "node --check src/*.js"
-  },
+  "main": "src/matrix.ts",
   "author": "David A Roberts",
   "license": "MIT",
   "dependencies": {
