@@ -601,10 +601,9 @@ http-signature@~1.2.0:
     jsprim "^1.2.2"
     sshpk "^1.7.0"
 
-hubot@^3.3.2:
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/hubot/-/hubot-3.3.2.tgz#6ad13db19082cbe57ee3f9cc1c2c856d15cba223"
-  integrity sha512-+8h/s+t5GirjuDW5K1QjTGBGzOU8ksEi51HeLdFghYOWj40x6ndhAU3C6SRPk/7yHj6luVPuVi/Y8s0P+lqM9Q==
+"hubot@github:thesis/hubot#1ca361a":
+  version "0.0.0-development"
+  resolved "https://codeload.github.com/thesis/hubot/tar.gz/1ca361a2c95191feee3e434bc6ff1972d3c4f534"
   dependencies:
     async ">=0.1.0 <1.0.0"
     chalk "^1.0.0"

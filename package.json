@@ -12,7 +12,7 @@
     "node-localstorage": "^2.2.1",
     "parent-require": "^1.0.0",
     "request": "^2.79.0",
-    "hubot": "^3.3.2"
+    "hubot": "github:thesis/hubot#1ca361a"
   },
   "peerDependencies": {
     "hubot": ">=3.0"
