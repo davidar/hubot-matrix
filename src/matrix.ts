@@ -10,6 +10,27 @@ import sdk from "matrix-js-sdk";
 import request from "request";
 import sizeOf from "image-size";
 
+/**
+ * The Matrix-specific metadata available about a message.
+ */
+export type MatrixMessageMetadata = {
+  readonly threadId: string;
+};
+
+/**
+ * Represents a regular Hubot TextMessage with additional Matrix metadata.
+ */
+export class MatrixMessage extends TextMessage {
+  constructor(
+    user: User,
+    text: string,
+    id: string,
+    public metadata: MatrixMessageMetadata
+  ) {
+    super(user, text, id);
+  }
+}
+
 class Matrix extends Adapter {
   private client: MatrixClient | undefined;
   private user_id: string | undefined;
@@ -208,6 +229,7 @@ class Matrix extends Adapter {
             toStartOfTimeline === false
           ) {
             this.client.setPresence({ presence: "online" });
+            let id = event.getId();
             let message = event.getContent();
             let name = event.getSender();
             let user = this.robot.brain.userForId(name);
@@ -219,7 +241,13 @@ class Matrix extends Adapter {
                 }, from: ${user.name} (${user.id}).`
               );
               if (message.msgtype === "m.text") {
-                this.receive(new TextMessage(user, message.body, ""));
+                const messageThreadId = event.threadRootId ?? id;
+
+                this.receive(
+                  new MatrixMessage(user, message.body, id, {
+                    threadId: messageThreadId,
+                  })
+                );
               }
               if (
                 message.msgtype !== "m.text" ||
