@@ -1,11 +1,4 @@
-import {
-  default as hubot,
-  Robot,
-  Adapter,
-  Envelope,
-  TextMessage,
-  User,
-} from "hubot";
+import { Robot, Adapter, Envelope, TextMessage, User } from "hubot";
 import {
   ClientEvent,
   MatrixClient,
@@ -27,7 +20,7 @@ export type MatrixMessageMetadata = {
 /**
  * Represents a regular Hubot TextMessage with additional Matrix metadata.
  */
-export class MatrixMessage extends hubot.TextMessage {
+export class MatrixMessage extends TextMessage {
   constructor(
     user: User,
     text: string,
@@ -38,7 +31,7 @@ export class MatrixMessage extends hubot.TextMessage {
   }
 }
 
-class Matrix extends hubot.Adapter {
+class Matrix extends Adapter {
   private client: MatrixClient | undefined;
   private user_id: string | undefined;
   private access_token: string | undefined;
@@ -61,7 +54,7 @@ class Matrix extends hubot.Adapter {
               this.robot.logger.info(
                 `Acknowledging ${stranger}'s device ${device}`
               );
-              result1.push(this.client.setDeviceKnown(stranger, device));
+              result1.push(this.client?.setDeviceKnown(stranger, device));
             }
             return result1;
           })()
@@ -71,7 +64,7 @@ class Matrix extends hubot.Adapter {
     })();
   }
 
-  send(envelope: Envelope, ...strings: any[]) {
+  send(envelope: Envelope, ...strings: any[]): any {
     return strings.map((str) => this.sendThreaded(envelope, undefined, str));
   }
 
@@ -79,35 +72,35 @@ class Matrix extends hubot.Adapter {
     envelope: Envelope,
     threadId: string | undefined,
     message: string
-  ) {
+  ): any {
     this.robot.logger.info(`Sending to ${envelope.room}: ${message}`);
     if (/^(f|ht)tps?:\/\//i.test(message)) {
       return this.sendURL(envelope, message);
     }
     if (threadId !== undefined) {
       return this.client
-        .sendNotice(envelope.room, threadId, message)
-        .catch((err) => {
+        ?.sendNotice(envelope.room, threadId, message)
+        ?.catch((err) => {
           if (err.name === "UnknownDeviceError") {
             this.handleUnknownDevices(err);
-            return this.client.sendNotice(envelope.room, threadId, message);
+            return this.client?.sendNotice(envelope.room, threadId, message);
           }
         });
     }
-    return this.client.sendNotice(envelope.room, message).catch((err) => {
+    return this.client?.sendNotice(envelope.room, message).catch((err) => {
       if (err.name === "UnknownDeviceError") {
         this.handleUnknownDevices(err);
-        return this.client.sendNotice(envelope.room, message);
+        return this.client?.sendNotice(envelope.room, message);
       }
     });
   }
 
   emote(envelope: Envelope, ...strings: string[]) {
     return Array.from(strings).map((str) =>
-      this.client.sendEmoteMessage(envelope.room, str).catch((err) => {
+      this.client?.sendEmoteMessage(envelope.room, str).catch((err) => {
         if (err.name === "UnknownDeviceError") {
           this.handleUnknownDevices(err);
-          return this.client.sendEmoteMessage(envelope.room, str);
+          return this.client?.sendEmoteMessage(envelope.room, str);
         }
       })
     );
@@ -126,7 +119,7 @@ class Matrix extends hubot.Adapter {
 
   topic(envelope: Envelope, ...strings: string[]) {
     return Array.from(strings).map((str) =>
-      this.client.sendStateEvent(
+      this.client?.sendStateEvent(
         envelope.room,
         "m.room.topic",
         {
@@ -161,7 +154,7 @@ class Matrix extends hubot.Adapter {
             size: body.length,
           };
           return this.client
-            .uploadContent(body, {
+            ?.uploadContent(body, {
               name: url,
               type: info.mimetype,
               rawResponse: false,
@@ -169,11 +162,11 @@ class Matrix extends hubot.Adapter {
             })
             .then((content_uri) => {
               return this.client
-                .sendImageMessage(envelope.room, content_uri, info, url)
+                ?.sendImageMessage(envelope.room, content_uri, info, url)
                 .catch((err) => {
                   if (err.name === "UnknownDeviceError") {
                     this.handleUnknownDevices(err);
-                    return this.client.sendImageMessage(
+                    return this.client?.sendImageMessage(
                       envelope.room,
                       content_uri,
                       info,
@@ -224,71 +217,74 @@ class Matrix extends hubot.Adapter {
           deviceId: this.device_id,
           request,
         });
-        this.client.on(ClientEvent.Sync, (state) => {
+        this.client?.on(ClientEvent.Sync, (state) => {
           switch (state) {
             case "PREPARED":
               this.robot.logger.info(
-                `Synced ${this.client.getRooms().length} rooms`
+                `Synced ${this.client?.getRooms().length} rooms`
               );
               // We really don't want to let people set the display name to something other than the bot
               // name because the bot only reacts to it's own name.
-              const currentDisplayName = this.client.getUser(
-                this.user_id
-              ).displayName;
+              const currentDisplayName = this.client?.getUser(
+                this.user_id ?? ""
+              )?.displayName;
               if (this.robot.name !== currentDisplayName) {
                 this.robot.logger.info(
                   `Setting display name to ${this.robot.name}`
                 );
-                this.client.setDisplayName(this.robot.name, () => {});
+                this.client?.setDisplayName(this.robot.name, () => {});
               }
               return this.emit("connected");
           }
         });
-        this.client.on(RoomEvent.Timeline, (event, room, toStartOfTimeline) => {
-          if (
-            event.getType() === "m.room.message" &&
-            toStartOfTimeline === false
-          ) {
-            this.client.setPresence({ presence: "online" });
-            let id = event.getId();
-            let message = event.getContent();
-            let name = event.getSender();
-            let user = this.robot.brain.userForId(name);
-            user.room = room.roomId;
-            if (name !== this.user_id) {
-              this.robot.logger.info(
-                `Received message: ${JSON.stringify(message)} in room: ${
-                  user.room
-                }, from: ${user.name} (${user.id}).`
-              );
-              if (message.msgtype === "m.text") {
-                const messageThreadId = event.threadRootId ?? id;
-
-                this.receive(
-                  new MatrixMessage(user, message.body, id, {
-                    threadId: messageThreadId,
-                  })
+        this.client?.on(
+          RoomEvent.Timeline,
+          (event, room, toStartOfTimeline) => {
+            if (
+              event.getType() === "m.room.message" &&
+              toStartOfTimeline === false
+            ) {
+              this.client?.setPresence({ presence: "online" });
+              let id = event.getId();
+              let message = event.getContent();
+              let name = event.getSender();
+              let user = this.robot.brain.userForId(name);
+              user.room = room.roomId;
+              if (name !== this.user_id) {
+                this.robot.logger.info(
+                  `Received message: ${JSON.stringify(message)} in room: ${
+                    user.room
+                  }, from: ${user.name} (${user.id}).`
                 );
-              }
-              if (
-                message.msgtype !== "m.text" ||
-                message.body.indexOf(this.robot.name) !== -1
-              ) {
-                return this.client.sendReadReceipt(event);
+                if (message.msgtype === "m.text") {
+                  const messageThreadId = event.threadRootId ?? id;
+
+                  this.receive(
+                    new MatrixMessage(user, message.body, id, {
+                      threadId: messageThreadId,
+                    })
+                  );
+                }
+                if (
+                  message.msgtype !== "m.text" ||
+                  message.body.indexOf(this.robot.name) !== -1
+                ) {
+                  return this.client?.sendReadReceipt(event);
+                }
               }
             }
           }
-        });
-        this.client.on(RoomMemberEvent.Membership, async (event, member) => {
+        );
+        this.client?.on(RoomMemberEvent.Membership, async (event, member) => {
           if (
             member.membership === "invite" &&
             member.userId === this.user_id
           ) {
-            await this.client.joinRoom(member.roomId);
+            await this.client?.joinRoom(member.roomId);
             this.robot.logger.info(`Auto-joined ${member.roomId}`);
           }
         });
-        return this.client.startClient({ initialSyncLimit: 0 });
+        return this.client?.startClient({ initialSyncLimit: 0 });
       }
     );
   }

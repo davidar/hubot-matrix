@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "allowJs": true,
+    "lib": ["es2017"],
+    "noEmit": true,
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strict": true,
+		"allowSyntheticDefaultImports": true,
+    "target": "esnext"
+  },
+  "typeAcquisition": {
+    "enable": true
+  }
+}
+
