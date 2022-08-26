@@ -763,10 +763,10 @@ var Matrix = /*#__PURE__*/function (_Adapter) {
   return Matrix;
 }(hubot.Adapter);
 
-function matrix (robot) {
+function use(robot) {
   return new Matrix(robot);
 }
 
 exports.MatrixMessage = MatrixMessage;
-exports["default"] = matrix;
+exports.use = use;
 //# sourceMappingURL=matrix.cjs.development.js.map

@@ -6,7 +6,6 @@
   "author": "David A Roberts",
   "license": "MIT",
   "dependencies": {
-    "hubot": "github:thesis/hubot#1ca361a",
     "image-size": "^0.5.1",
     "matrix-js-sdk": "^19.0.0",
     "node-localstorage": "^2.2.1",
@@ -27,6 +26,6 @@
   },
   "typings": "dist/matrix.d.ts",
   "scripts": {
-    "build": "dts build --name Matrix --entry src/matrix.ts --format esm"
+    "build": "dts build --name Matrix --entry src/matrix.ts --format cjs"
   }
 }

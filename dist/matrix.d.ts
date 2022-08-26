@@ -34,5 +34,5 @@ declare class Matrix extends Adapter {
     sendURL(envelope: Envelope, url: string): request.Request;
     run(): Promise<any>;
 }
-export default function (robot: Robot<any>): Matrix;
+export declare function use(robot: Robot<any>): Matrix;
 export {};

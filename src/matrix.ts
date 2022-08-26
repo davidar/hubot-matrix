@@ -290,6 +290,6 @@ class Matrix extends Adapter {
   }
 }
 
-export default function (robot: Robot<any>): Matrix {
+export function use(robot: Robot<any>): Matrix {
   return new Matrix(robot);
 }
