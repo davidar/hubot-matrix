@@ -5,6 +5,7 @@
   "main": "src/matrix.ts",
   "author": "David A Roberts",
   "license": "MIT",
+  "type": "module",
   "dependencies": {
     "image-size": "^0.5.1",
     "matrix-js-sdk": "^19.0.0",
