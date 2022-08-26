@@ -1,4 +1,11 @@
-import { Robot, Adapter, TextMessage, Envelope, User } from "hubot";
+import {
+  default as hubot,
+  Robot,
+  Adapter,
+  Envelope,
+  TextMessage,
+  User,
+} from "hubot";
 import {
   ClientEvent,
   MatrixClient,
@@ -20,7 +27,7 @@ export type MatrixMessageMetadata = {
 /**
  * Represents a regular Hubot TextMessage with additional Matrix metadata.
  */
-export class MatrixMessage extends TextMessage {
+export class MatrixMessage extends hubot.TextMessage {
   constructor(
     user: User,
     text: string,
@@ -31,7 +38,7 @@ export class MatrixMessage extends TextMessage {
   }
 }
 
-class Matrix extends Adapter {
+class Matrix extends hubot.Adapter {
   private client: MatrixClient | undefined;
   private user_id: string | undefined;
   private access_token: string | undefined;
