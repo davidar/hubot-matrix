@@ -1,6 +1,6 @@
 {
   "name": "hubot-matrix",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Matrix adapter for Hubot",
   "main": "src/matrix.ts",
   "author": "David A Roberts",
