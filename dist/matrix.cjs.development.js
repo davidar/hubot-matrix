@@ -546,7 +546,7 @@ var Matrix = /*#__PURE__*/function (_Adapter) {
   _proto.reply = function reply(envelope) {
     var _this7 = this;
 
-    var threadId = envelope.message instanceof MatrixMessage ? envelope.message.metadata.threadId : undefined;
+    var threadId = "metadata" in envelope.message ? envelope.message.metadata.threadId : undefined;
 
     for (var _len3 = arguments.length, strings = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
       strings[_key3 - 1] = arguments[_key3];

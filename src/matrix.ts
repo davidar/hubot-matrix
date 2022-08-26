@@ -108,8 +108,8 @@ class Matrix extends Adapter {
 
   reply(envelope: Envelope, ...strings: string[]) {
     let threadId =
-      envelope.message instanceof MatrixMessage
-        ? envelope.message.metadata.threadId
+      "metadata" in envelope.message
+        ? (envelope.message as MatrixMessage).metadata.threadId
         : undefined;
 
     return Array.from(strings).map((str) =>
