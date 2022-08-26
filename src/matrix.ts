@@ -1,4 +1,4 @@
-import { Robot, Adapter, TextMessage, Envelope } from "hubot";
+import { Robot, Adapter, TextMessage, Envelope, User } from "hubot";
 import {
   ClientEvent,
   MatrixClient,
@@ -65,25 +65,34 @@ class Matrix extends Adapter {
   }
 
   send(envelope: Envelope, ...strings: any[]) {
-    return (() => {
-      let result = [];
-      for (var str of Array.from(strings)) {
-        this.robot.logger.info(`Sending to ${envelope.room}: ${str}`);
-        if (/^(f|ht)tps?:\/\//i.test(str)) {
-          result.push(this.sendURL(envelope, str));
-        } else {
-          result.push(
-            this.client.sendNotice(envelope.room, str).catch((err) => {
-              if (err.name === "UnknownDeviceError") {
-                this.handleUnknownDevices(err);
-                return this.client.sendNotice(envelope.room, str);
-              }
-            })
-          );
-        }
+    return strings.map((str) => this.sendThreaded(envelope, undefined, str));
+  }
+
+  sendThreaded(
+    envelope: Envelope,
+    threadId: string | undefined,
+    message: string
+  ) {
+    this.robot.logger.info(`Sending to ${envelope.room}: ${message}`);
+    if (/^(f|ht)tps?:\/\//i.test(message)) {
+      return this.sendURL(envelope, message);
+    }
+    if (threadId !== undefined) {
+      return this.client
+        .sendNotice(envelope.room, threadId, message)
+        .catch((err) => {
+          if (err.name === "UnknownDeviceError") {
+            this.handleUnknownDevices(err);
+            return this.client.sendNotice(envelope.room, threadId, message);
+          }
+        });
+    }
+    return this.client.sendNotice(envelope.room, message).catch((err) => {
+      if (err.name === "UnknownDeviceError") {
+        this.handleUnknownDevices(err);
+        return this.client.sendNotice(envelope.room, message);
       }
-      return result;
-    })();
+    });
   }
 
   emote(envelope: Envelope, ...strings: string[]) {
@@ -98,8 +107,13 @@ class Matrix extends Adapter {
   }
 
   reply(envelope: Envelope, ...strings: string[]) {
+    let threadId =
+      envelope.message instanceof MatrixMessage
+        ? envelope.message.metadata.threadId
+        : undefined;
+
     return Array.from(strings).map((str) =>
-      this.send(envelope, `${envelope.user.name}: ${str}`)
+      this.sendThreaded(envelope, threadId, `${envelope.user.name}: ${str}`)
     );
   }
 
